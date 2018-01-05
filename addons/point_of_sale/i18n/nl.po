@@ -284,6 +284,8 @@ msgid ""
 "A globally unique identifier for this pos configuration, used to prevent "
 "conflicts in client-generated data."
 msgstr ""
+"Een globale unieke identifier voor deze PoS configuratie, gebruikt om "
+"conflicten te voorkomen in cliënt gegenereerde data."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_session_login_number
@@ -2005,6 +2007,11 @@ msgid ""
 "be valid, this pricelist must be listed here as an available pricelist. "
 "Otherwise the default pricelist will apply."
 msgstr ""
+"Maak meerdere prijslijsten beschikbaar in de kassa. U kan een prijslijst ook"
+" toewijzen aan specifieke klanten vanuit het contact formulier (onder het "
+"tabblad verkopen). Om geldig te zijn moet de prijslijst hier opgelijst zijn "
+"als beschikbare prijslijst. Anders is de standaard prijslijst van "
+"toepassing."
 
 #. module: point_of_sale
 #: model:ir.ui.view,arch_db:point_of_sale.customer_facing_display_html
@@ -3373,7 +3380,7 @@ msgstr "Instellingen"
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config_iface_customer_facing_display
 msgid "Show checkout to customers with a remotely-connected screen."
-msgstr ""
+msgstr "Toon checkout aan klanten met een extern verbonden scherm."
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config_group_pricelist_item
@@ -4225,7 +4232,7 @@ msgstr "BTW:"
 #: code:addons/point_of_sale/static/src/xml/pos.xml:650
 #, python-format
 msgid "Validate"
-msgstr "Controleer"
+msgstr "Bevestig"
 
 #. module: point_of_sale
 #: model:ir.ui.view,arch_db:point_of_sale.view_pos_session_form
@@ -4559,7 +4566,7 @@ msgstr "b.v. bedrijfsadres, website"
 #. module: point_of_sale
 #: model:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "e.g. Return Policy, Thanks for shopping with us!"
-msgstr ""
+msgstr "b.v. terugstuurbeleid, bedankt om bij ons te kopen!"
 
 #. module: point_of_sale
 #. openerp-web

@@ -587,6 +587,52 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('float field with monetary widget and decimal precision', function (assert) {
+        assert.expect(5);
+
+        this.data.partner.records = [{
+            id: 1,
+            qux: -8.89859,
+            currency_id: 1,
+        }]
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<sheet>' +
+                        '<field name="qux" widget="monetary" options="{\'field_digits\': True}"/>' +
+                        '<field name="currency_id" invisible="1"/>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+            session: {
+                currencies: _.indexBy(this.data.currency.records, 'id'),
+            },
+        });
+
+        // Non-breaking space between the currency and the amount
+        assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a0-8.9',
+            'The value should be displayed properly.');
+
+        form.$buttons.find('.o_form_button_edit').click();
+        assert.strictEqual(form.$('input').val(), '-8.9',
+            'The input should be rendered without the currency symbol.');
+        assert.strictEqual(form.$('input').parent().children().first().text(), '$',
+            'The input should be preceded by a span containing the currency symbol.');
+
+        form.$('input').val('109.2458938598598').trigger('input');
+        assert.strictEqual(form.$('input').val(), '109.2458938598598',
+            'The value should not be formated yet.');
+
+        form.$buttons.find('.o_form_button_save').click();
+        // Non-breaking space between the currency and the amount
+        assert.strictEqual(form.$('.o_field_widget').first().text(), '$\u00a0109.2',
+            'The new value should be rounded properly.');
+
+        form.destroy();
+    });
+
     QUnit.module('FieldEmail');
 
     QUnit.test('email field in form view', function (assert) {
@@ -2415,6 +2461,63 @@ QUnit.module('basic_fields', {
         form.$buttons.find('.o_form_button_save').click();
         // Non-breaking space between the currency and the amount
         assert.strictEqual(form.$('.o_field_widget').first().text(), '108.25\u00a0€',
+            'The new value should be rounded properly.');
+
+        form.destroy();
+    });
+
+    QUnit.test('monetary field with currency digits != 2', function (assert) {
+        assert.expect(5);
+
+        this.data.partner.records = [{
+            id: 1,
+            bar: false,
+            foo: "pouet",
+            int_field: 68,
+            qux: 99.1234,
+            currency_id: 1,
+        }];
+        this.data.currency.records = [{
+            id: 1,
+            display_name: "VEF",
+            symbol: "Bs.F",
+            position: "after",
+            digits: [16, 4],
+        }];
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<sheet>' +
+                        '<field name="qux" widget="monetary"/>' +
+                        '<field name="currency_id" invisible="1"/>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+            session: {
+                currencies: _.indexBy(this.data.currency.records, 'id'),
+            },
+        });
+
+        // Non-breaking space between the currency and the amount
+        assert.strictEqual(form.$('.o_field_widget').first().text(), '99.1234\u00a0Bs.F',
+            'The value should be displayed properly.');
+
+        form.$buttons.find('.o_form_button_edit').click();
+        assert.strictEqual(form.$('input').first().val(), '99.1234',
+            'The input should be rendered without the currency symbol.');
+        assert.strictEqual(form.$('input').parent().children().eq(1).text(), 'Bs.F',
+            'The input should be followed by a span containing the currency symbol.');
+
+        form.$('input').first().val('99.111111111').trigger('input');
+        assert.strictEqual(form.$('input').first().val(), '99.111111111',
+            'The value should not be formated yet.');
+
+        form.$buttons.find('.o_form_button_save').click();
+        // Non-breaking space between the currency and the amount
+        assert.strictEqual(form.$('.o_field_widget').first().text(), '99.1111\u00a0Bs.F',
             'The new value should be rounded properly.');
 
         form.destroy();

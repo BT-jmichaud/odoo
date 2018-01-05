@@ -37,6 +37,8 @@ msgid ""
 "Authorize.net Error Message(s):\n"
 " %s"
 msgstr ""
+"Authorize.net Fejlbesked(er):\n"
+" %s"
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_token_authorize_profile
@@ -69,7 +71,7 @@ msgstr "Kortholders navn"
 #. module: payment_authorize
 #: model:ir.ui.view,arch_db:payment_authorize.authorize_s2s_form
 msgid "Expires (MM / YY)"
-msgstr ""
+msgstr "Udløber (MM / ÅÅ)"
 
 #. module: payment_authorize
 #: model:ir.ui.view,arch_db:payment_authorize.acquirer_form_authorize

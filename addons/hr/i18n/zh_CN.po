@@ -3,7 +3,7 @@
 # * hr
 # 
 # Translators:
-# Jeffery CHEN <jeffery9@gmail.com>, 2017
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2017
 # Martin Trigaux <mat@odoo.com>, 2017
 # Gary Wei <Gary.wei@elico-corp.com>, 2017
 # waveyeung <waveyeung@qq.com>, 2017
@@ -498,7 +498,7 @@ msgstr "男性"
 #: model:ir.ui.view,arch_db:hr.view_employee_filter
 #: model:res.groups,name:hr.group_hr_manager
 msgid "Manager"
-msgstr "管理员"
+msgstr "经理"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_marital
@@ -556,7 +556,7 @@ msgstr "停止招聘"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department_note
 msgid "Note"
-msgstr "便笺"
+msgstr "备注"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_notes
@@ -782,7 +782,7 @@ msgstr "员工地址与公司地址相链接"
 #. module: hr
 #: sql_constraint:hr.job:0
 msgid "The name of the job position must be unique per department in company!"
-msgstr "公司内部门的工作岗位名称必须唯一！"
+msgstr "在公司内每个部门的工作岗位名称必须唯一！"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee_image

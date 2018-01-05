@@ -286,11 +286,15 @@ function formatMonetary(value, field, options) {
         currency = session.get_currency(currency_id);
     }
 
+    var digits = (currency && currency.digits) || options.digits;
+    if (options.field_digits === true) {
+        digits = field.digits || digits;
+    }
     var formatted_value = formatFloat(value, field, {
-        digits:  (currency && currency.digits) || options.digits,
+        digits: digits,
     });
 
-    if (!currency) {
+    if (!currency || options.noSymbol) {
         return formatted_value;
     }
     if (currency.position === "after") {
