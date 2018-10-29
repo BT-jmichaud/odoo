@@ -3,7 +3,7 @@
 # * gamification
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2017
+# Martin Trigaux, 2017
 # Ejner Sønniksen <ejner@vkdata.dk>, 2017
 # Morten Schou <ms@msteknik.dk>, 2017
 # Sanne Kristensen <sanne@vkdata.dk>, 2017
@@ -632,6 +632,8 @@ msgid ""
 "<span class=\"o_stat_text\">Related</span>\n"
 "                                <span class=\"o_stat_text\">Goals</span>"
 msgstr ""
+"<span class=\"o_stat_text\">Relaterede</span>\n"
+"                                <span class=\"o_stat_text\">Mål</span>"
 
 #. module: gamification
 #: model:ir.actions.act_window,help:gamification.badge_list_action
@@ -717,7 +719,7 @@ msgstr ""
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_rule_auth_user_ids
 msgid "Authorized Users"
-msgstr "Autoriserede Brugere"
+msgstr "Autoriserede brugere"
 
 #. module: gamification
 #: selection:gamification.goal.definition,computation_mode:0
@@ -792,7 +794,7 @@ msgstr "Glimrende"
 #. module: gamification
 #: model:ir.ui.view,arch_db:gamification.badge_kanban_view
 msgid "Can not grant"
-msgstr "Can ikke tildele"
+msgstr "Kan ikke tildele"
 
 #. module: gamification
 #: code:addons/gamification/models/goal.py:412
@@ -891,7 +893,7 @@ msgstr "Klikbare Mål"
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal_closed
 msgid "Closed goal"
-msgstr ""
+msgstr "Lukket mål"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_comment
@@ -1144,7 +1146,7 @@ msgstr "For tredje bruger"
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge_reward_id
 msgid "For Every Succeeding User"
-msgstr "For Hver Succesfuld Bruger"
+msgstr "For hver succesfuld bruger"
 
 #. module: gamification
 #: model:ir.ui.view,arch_db:gamification.goal_definition_form_view
@@ -1228,7 +1230,7 @@ msgstr ""
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal_definition_description
 msgid "Goal Description"
-msgstr "Beskrivelse af Mål"
+msgstr "Beskrivelse af mål"
 
 #. module: gamification
 #: model:ir.ui.view,arch_db:gamification.goal_form_view
@@ -1869,7 +1871,7 @@ msgstr "Indstil din virksomhedsdata"
 #: model:gamification.challenge.line,name:gamification.line_base_admin2
 #: model:gamification.goal.definition,name:gamification.definition_base_company_logo
 msgid "Set your Company Logo"
-msgstr "Indstil Virksomhedens Logo"
+msgstr "Indstil virksomhedens logo"
 
 #. module: gamification
 #: model:gamification.challenge.line,name:gamification.line_base_discover1
@@ -1885,7 +1887,7 @@ msgstr ""
 #. module: gamification
 #: model:gamification.challenge,name:gamification.challenge_base_configure
 msgid "Setup your Company"
-msgstr "Opsæt din Virksomhed"
+msgstr "Opsæt din virksomhed"
 
 #. module: gamification
 #: model:ir.ui.view,arch_db:gamification.challenge_form_view

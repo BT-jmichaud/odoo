@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Bishisht Bhatta <bishisht.np.mnr@gmail.com>, 2017
+# Amit Kumar <amtkumar2053@gmail.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.saas~18\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-20 09:52+0000\n"
-"PO-Revision-Date: 2017-09-20 09:52+0000\n"
-"Last-Translator: Bishisht Bhatta <bishisht.np.mnr@gmail.com>, 2017\n"
+"POT-Creation-Date: 2018-03-15 07:58+0000\n"
+"PO-Revision-Date: 2018-03-15 07:58+0000\n"
+"Last-Translator: Amit Kumar <amtkumar2053@gmail.com>, 2018\n"
 "Language-Team: Nepali (https://www.transifex.com/odoo/teams/41243/ne/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,17 +35,15 @@ msgid "Cities"
 msgstr "शहरहरू"
 
 #. module: base_address_city
+#: code:addons/base_address_city/models/res_partner.py:36
 #: model:ir.model,name:base_address_city.model_res_city
-#: model:ir.ui.view,arch_db:base_address_city.view_city_filter
-#: model:ir.ui.view,arch_db:base_address_city.view_city_tree
-msgid "City"
-msgstr "शहर"
-
-#. module: base_address_city
 #: model:ir.model.fields,field_description:base_address_city.field_res_partner_city_id
 #: model:ir.model.fields,field_description:base_address_city.field_res_users_city_id
-msgid "Company"
-msgstr "कम्पनी"
+#: model:ir.ui.view,arch_db:base_address_city.view_city_filter
+#: model:ir.ui.view,arch_db:base_address_city.view_city_tree
+#, python-format
+msgid "City"
+msgstr "शहर"
 
 #. module: base_address_city
 #: model:ir.model,name:base_address_city.model_res_partner
@@ -65,7 +64,7 @@ msgstr "द्वारा सिर्जना गरियो"
 #. module: base_address_city
 #: model:ir.model.fields,field_description:base_address_city.field_res_city_create_date
 msgid "Created on"
-msgstr ""
+msgstr "मा सिर्जना गरियो"
 
 #. module: base_address_city
 #: model:ir.model.fields,field_description:base_address_city.field_res_city_display_name

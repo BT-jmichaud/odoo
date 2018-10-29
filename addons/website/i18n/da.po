@@ -5,7 +5,7 @@
 # Translators:
 # Pernille Kristensen <pernillekristensen1994@gmail.com>, 2017
 # Morten Schou <ms@msteknik.dk>, 2017
-# Martin Trigaux <mat@odoo.com>, 2017
+# Martin Trigaux, 2017
 # Sanne Kristensen <sanne@vkdata.dk>, 2017
 # peso <peer.sommerlund@gmail.com>, 2017
 # Per Rasmussen <perhgrasmussen@gmail.com>, 2017
@@ -21,8 +21,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-30 13:11+0000\n"
-"PO-Revision-Date: 2017-11-30 13:11+0000\n"
+"POT-Creation-Date: 2018-02-19 13:42+0000\n"
+"PO-Revision-Date: 2018-02-19 13:42+0000\n"
 "Last-Translator: lhmflexerp <lhm@flexerp.dk>, 2017\n"
 "Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
@@ -974,7 +974,7 @@ msgstr "Gå efter en .com og / eller din landekode"
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_company_team
 msgid "Aline Turner, CTO"
-msgstr ""
+msgstr "Aline Turner, CTO"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_company_team
@@ -1310,7 +1310,7 @@ msgstr "Tillykke, du er færdig!"
 #. module: website
 #: model:ir.ui.view,arch_db:website.footer_default
 msgid "Connect with us"
-msgstr ""
+msgstr "Forbind med os"
 
 #. module: website
 #: model:ir.model,name:website.model_res_partner
@@ -1350,7 +1350,7 @@ msgstr "Kontakt os"
 #: model:website.page,arch_db:website.contactus_page
 #: model:website.page,arch_db:website.website2_contactus_page
 msgid "Contact us about anything related to our company or services."
-msgstr ""
+msgstr "Kontakt os omkring alt der vedrører vores virksomhed eller ydelser."
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_big_picture
@@ -1405,7 +1405,7 @@ msgstr "Opret et fællesskab"
 #. module: website
 #: model:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Create several versions of your website pages"
-msgstr ""
+msgstr "Opret flere versioner af dine websider"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_create_uid
@@ -1485,7 +1485,7 @@ msgstr "Standard sprogkode"
 #: code:addons/website/static/src/xml/website.seo.xml:41
 #, python-format
 msgid "Define Keywords"
-msgstr ""
+msgstr "Angiv nøgleord"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_feature_grid
@@ -1709,7 +1709,7 @@ msgstr ""
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_comparisons
 msgid "Email support"
-msgstr "Email support"
+msgstr "E-mail support"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -1794,6 +1794,11 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website.s_three_columns
 msgid "Feature Two"
 msgstr "Funktion To"
+
+#. module: website
+#: model:ir.model,name:website.model_ir_model_fields
+msgid "Fields"
+msgstr "Felter"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -2267,14 +2272,15 @@ msgid ""
 msgstr ""
 
 #. module: website
+#: model:ir.model.fields,field_description:website.field_website_menu_is_visible
 #: model:ir.model.fields,field_description:website.field_website_page_is_visible
 msgid "Is Visible"
-msgstr "Er Synlig"
+msgstr "Er synlig"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
 msgid "Is the keyword popular in Google?"
-msgstr ""
+msgstr "Er nøgleordet populært i Google?"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -2329,7 +2335,7 @@ msgstr "Nøgle"
 #: code:addons/website/static/src/xml/website.seo.xml:48
 #, python-format
 msgid "Keyword"
-msgstr ""
+msgstr "Søgeord"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings_language_ids
@@ -2503,7 +2509,7 @@ msgstr ""
 #. module: website
 #: model:ir.ui.view,arch_db:website.edit_website_pages
 msgid "Manage this page"
-msgstr ""
+msgstr "Administrer denne side"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.snippet_options
@@ -2580,6 +2586,11 @@ msgstr "Model"
 #: model:ir.model.fields,field_description:website.field_website_page_model_data_id
 msgid "Model Data"
 msgstr "Model Data"
+
+#. module: website
+#: model:ir.model,name:website.model_ir_model
+msgid "Models"
+msgstr "Modeller"
 
 #. module: website
 #. openerp-web
@@ -3106,7 +3117,7 @@ msgstr ""
 #: code:addons/website/static/src/js/tours/banner.js:42
 #, python-format
 msgid "Publish your page by clicking on the <b>Save</b> button."
-msgstr ""
+msgstr "Udgiv din side ved at klikke på <b>Gem</b> knappen."
 
 #. module: website
 #. openerp-web

@@ -171,9 +171,16 @@ function createAsyncView(params) {
         });
     }
 
+    if (params.interceptsPropagate) {
+        _.each(params.interceptsPropagate, function (cb, name) {
+            intercept(widget, name, cb, true);
+        });
+    }
+
     return view.getController(widget).then(function (view) {
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
+        view.__destroy = view.destroy;
         view.destroy = function () {
             // remove the override to properly destroy the view and its children
             // when it will be called the second time (by its parent)
@@ -413,10 +420,11 @@ function dragAndDrop($el, $to, options) {
     var toOffset = $to.offset();
     toOffset.top += $to.outerHeight()/2;
     toOffset.left += $to.outerWidth()/2;
+    var vertical_offset = (toOffset.top < elementCenter.top) ? -1 : 1;
     if (position === 'top') {
-        toOffset.top -= $to.outerHeight()/2;
+        toOffset.top -= $to.outerHeight()/2 + vertical_offset;
     } else if (position === 'bottom') {
-        toOffset.top += $to.outerHeight()/2;
+        toOffset.top += $to.outerHeight()/2 - vertical_offset;
     } else if (position === 'left') {
         toOffset.left -= $to.outerWidth()/2;
     } else if (position === 'right') {
@@ -535,47 +543,83 @@ function removeSrcAttribute($el, widget) {
 
 var patches = {};
 /**
- * Patches a given Class with the given properties.
+ * Patches a given Class or Object with the given properties.
  *
- * @param {Class} Klass
+ * @param {Class|Object} target
  * @param {Object} props
  */
-function patch (Klass, props) {
+function patch (target, props) {
     var patchID = _.uniqueId('patch_');
-    Klass.__patchID = patchID;
+    target.__patchID = patchID;
     patches[patchID] = {
-        Klass: Klass,
+        target: target,
         otherPatchedProps: [],
         ownPatchedProps: [],
     };
-    _.each(props, function (value, key) {
-        if (Klass.prototype.hasOwnProperty(key)) {
-            patches[patchID].ownPatchedProps.push({
-                key: key,
-                initialValue: Klass.prototype[key],
-            });
-        } else {
-            patches[patchID].otherPatchedProps.push(key);
-        }
-    });
-    Klass.include(props);
+    if (target.prototype) {
+        _.each(props, function (value, key) {
+            if (target.prototype.hasOwnProperty(key)) {
+                patches[patchID].ownPatchedProps.push({
+                    key: key,
+                    initialValue: target.prototype[key],
+                });
+            } else {
+                patches[patchID].otherPatchedProps.push(key);
+            }
+        });
+        target.include(props);
+    } else {
+        _.each(props, function (value, key) {
+            if (key in target) {
+                var oldValue = target[key];
+                patches[patchID].ownPatchedProps.push({
+                    key: key,
+                    initialValue: oldValue,
+                });
+                if (typeof value === 'function') {
+                    target[key] = function () {
+                        var oldSuper = this._super;
+                        this._super = oldValue;
+                        var result = value.apply(this, arguments);
+                        if (oldSuper === undefined) {
+                            delete this._super;
+                        } else {
+                            this._super = oldSuper;
+                        }
+                        return result;
+                    };
+                } else {
+                    target[key] = value;
+                }
+            } else {
+                patches[patchID].otherPatchedProps.push(key);
+                target[key] = value;
+            }
+        });
+    }
 }
 /**
- * Unpatches a given Class.
+ * Unpatches a given Class or Object.
  *
- * @param {Class} Klass
+ * @param {Class|Object} target
  */
-function unpatch(Klass) {
-    var patchID = Klass.__patchID;
+function unpatch(target) {
+    var patchID = target.__patchID;
     var patch = patches[patchID];
     _.each(patch.ownPatchedProps, function (p) {
-        Klass[p.key] = p.initialValue;
+        target[p.key] = p.initialValue;
     });
-    _.each(patch.otherPatchedProps, function (key) {
-        delete Klass.prototype[key];
-    });
+    if (target.prototype) {
+        _.each(patch.otherPatchedProps, function (key) {
+            delete target.prototype[key];
+        });
+    } else {
+        _.each(patch.otherPatchedProps, function (key) {
+            delete target[key];
+        });
+    }
     delete patches[patchID];
-    delete Klass.__patchID;
+    delete target.__patchID;
 }
 
 // Loading static files cannot be properly simulated when their real content is

@@ -290,7 +290,8 @@ class AccountChartTemplate(models.Model):
             tmp1, tmp2 = self.parent_id._install_template(company, code_digits=code_digits, transfer_account_id=transfer_account_id, acc_ref=acc_ref, taxes_ref=taxes_ref)
             acc_ref.update(tmp1)
             taxes_ref.update(tmp2)
-        tmp1, tmp2 = self._load_template(company, code_digits=code_digits, transfer_account_id=transfer_account_id, account_ref=acc_ref, taxes_ref=taxes_ref)
+        # Ensure, even if individually, that everything is translated according to the company's language.
+        tmp1, tmp2 = self.with_context(lang=company.partner_id.lang)._load_template(company, code_digits=code_digits, transfer_account_id=transfer_account_id, account_ref=acc_ref, taxes_ref=taxes_ref)
         acc_ref.update(tmp1)
         taxes_ref.update(tmp2)
         return acc_ref, taxes_ref
@@ -509,7 +510,7 @@ class AccountTaxTemplate(models.Model):
     amount_type = fields.Selection(default='percent', string="Tax Computation", required=True,
         selection=[('group', 'Group of Taxes'), ('fixed', 'Fixed'), ('percent', 'Percentage of Price'), ('division', 'Percentage of Price Tax Included')])
     active = fields.Boolean(default=True, help="Set active to false to hide the tax without removing it.")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.user.company_id)
     children_tax_ids = fields.Many2many('account.tax.template', 'account_tax_template_filiation_rel', 'parent_tax', 'child_tax', string='Children Taxes')
     sequence = fields.Integer(required=True, default=1,
         help="The sequence field is used to define order in which the tax lines are applied.")
@@ -739,6 +740,9 @@ class WizardMultiChartsAccounts(models.TransientModel):
                 res.setdefault('domain', {})
                 res['domain']['sale_tax_id'] = repr(sale_tax_domain)
                 res['domain']['purchase_tax_id'] = repr(purchase_tax_domain)
+            else:
+                self.sale_tax_id = False
+                self.purchase_tax_id = False
             if self.chart_template_id.transfer_account_id:
                 self.transfer_account_id = self.chart_template_id.transfer_account_id.id
             if self.chart_template_id.code_digits:
@@ -769,7 +773,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
             if company_id:
                 company = self.env['res.company'].browse(company_id)
                 currency_id = company.on_change_country(company.country_id.id)['value']['currency_id']
-                res.update({'currency_id': currency_id.id})
+                res.update({'currency_id': currency_id})
 
         chart_templates = account_chart_template.search([('visible', '=', True)])
         if chart_templates:
@@ -843,7 +847,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
 
     @api.multi
     def existing_accounting(self, company_id):
-        model_to_check = ['account.move.line', 'account.invoice', 'account.move', 'account.payment', 'account.bank.statement']
+        model_to_check = ['account.move.line', 'account.invoice', 'account.payment', 'account.bank.statement']
         for model in model_to_check:
             if len(self.env[model].search([('company_id', '=', company_id.id)])) > 0:
                 return True
@@ -856,6 +860,8 @@ class WizardMultiChartsAccounts(models.TransientModel):
         all the provided information to create the accounts, the banks, the journals, the taxes, the
         accounting properties... accordingly for the chosen company.
         '''
+        # Ensure everything is translated consitingly to the company's language, not the user's one.
+        self = self.with_context(lang=self.company_id.partner_id.lang)
         if not self.env.user._is_admin():
             raise AccessError(_("Only administrators can change the settings"))
 
@@ -876,7 +882,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
                 accounting_props.unlink()
 
             # delete account, journal, tax, fiscal position and reconciliation model
-            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.journal']
+            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.move', 'account.journal']
             for model in models_to_delete:
                 res = self.env[model].search([('company_id', '=', self.company_id.id)])
                 if len(res):

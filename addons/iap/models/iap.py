@@ -72,6 +72,11 @@ def jsonrpc(url, method='call', params=None):
 #----------------------------------------------------------
 # Helpers for proxy
 #----------------------------------------------------------
+class IapTransaction(object):
+
+    def __init__(self):
+        self.credit = None
+
 @contextlib.contextmanager
 def charge(env, key, account_token, credit, description=None, credit_template=None):
     """
@@ -107,7 +112,9 @@ def charge(env, key, account_token, credit, description=None, credit_template=No
             e.args = (json.dumps(arguments),)
         raise e
     try:
-        yield
+        transaction = IapTransaction()
+        transaction.credit = credit
+        yield transaction
     except Exception as e:
         params = {
             'token': transaction_token,
@@ -119,6 +126,7 @@ def charge(env, key, account_token, credit, description=None, credit_template=No
         params = {
             'token': transaction_token,
             'key': key,
+            'credit_to_capture': transaction.credit,
         }
         r = jsonrpc(endpoint + '/iap/1/capture', params=params) # noqa
 
@@ -138,7 +146,8 @@ class IapAccount(models.Model):
     def get(self, service_name):
         account = self.search([('service_name', '=', service_name), ('company_id', 'in', [self.env.user.company_id.id, False])])
         if not account:
-            account = self.create({'service_name': service_name})
+            # TODO: remove this sudo in v12 as we change the user rights.
+            account = self.sudo().create({'service_name': service_name}).with_env(self.env)
             # Since the account did not exist yet, we will encounter a NoCreditError,
             # which is going to rollback the database and undo the account creation,
             # preventing the process to continue any further.

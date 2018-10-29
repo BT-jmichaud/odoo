@@ -6,7 +6,7 @@
 Installing Odoo
 ===============
 
-There are mutliple ways to install Odoo, or not install it at all, depending
+There are multiple ways to install Odoo, or not install it at all, depending
 on the intended use case.
 
 This documents attempts to describe most of the installation options.
@@ -360,13 +360,6 @@ Source installation requires manually installing dependencies:
     Install ``psycopg`` using the installer here
     http://www.stickpeople.com/projects/python/win-psycopg/
 
-    Then edit the requirements.txt file:
-
-    - remove ``psycopg2`` as you already have it.
-    - remove the optional ``python-ldap``, ``gevent`` and ``psutil`` because
-      they require compilation.
-    - add ``pypiwin32`` because it's needed under windows.
-
     Then use pip to install the dependencies using the following
     command from a cmd.exe prompt (replace ``\YourOdooPath`` by the actual
     path where you downloaded Odoo):
@@ -413,7 +406,7 @@ Source installation requires manually installing dependencies:
 
         $ sudo npm install -g less
 
-  - on Windows, `install nodejs <http://nodejs.org/download/>`_, reboot (to
+  - on Windows, `install nodejs <https://nodejs.org/en/download/>`_, reboot (to
     update the :envvar:`PATH`) and install less:
 
     .. code-block:: doscon
@@ -595,7 +588,7 @@ Docker
 ======
 
 The full documentation on how to use Odoo with Docker can be found on the
-offcial Odoo `docker image <https://registry.hub.docker.com/_/odoo/>`_ page.
+official Odoo `docker image <https://registry.hub.docker.com/_/odoo/>`_ page.
 
 .. _demo: https://demo.odoo.com
 .. _docker: https://www.docker.com

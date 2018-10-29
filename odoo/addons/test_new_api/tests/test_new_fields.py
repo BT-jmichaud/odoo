@@ -61,6 +61,19 @@ class TestFields(common.TransactionCase):
         self.assertTrue(field.store)
         self.assertTrue(field.readonly)
 
+    def test_10_computed_custom(self):
+        """ check definition of custom computed fields """
+        self.env['ir.model.fields'].create({
+            'name': 'x_bool_false_computed',
+            'model_id': self.env.ref('test_new_api.model_test_new_api_message').id,
+            'field_description': 'A boolean computed to false',
+            'compute': "for r in self: r['x_bool_false_computed'] = False",
+            'store': False,
+            'ttype': 'boolean'
+        })
+        field = self.env['test_new_api.message']._fields['x_bool_false_computed']
+        self.assertFalse(field.depends)
+
     def test_10_non_stored(self):
         """ test non-stored fields """
         # a field declared with store=False should not have a column
@@ -232,6 +245,13 @@ class TestFields(common.TransactionCase):
         self.assertEqual(cath.parent, beth)
         self.assertEqual(ewan.parent, cath)
         self.assertEqual(ewan.name, "Erwan")
+
+        # write on non-stored inverse field on severals records
+        foo1 = Category.create({'name': 'Foo'})
+        foo2 = Category.create({'name': 'Foo'})
+        (foo1 + foo2).write({'display_name': 'Bar'})
+        self.assertEqual(foo1.name, 'Bar')
+        self.assertEqual(foo2.name, 'Bar')
 
         record = self.env['test_new_api.compute.inverse']
 
@@ -544,6 +564,7 @@ class TestFields(common.TransactionCase):
         company0 = self.env.ref('base.main_company')
         company1 = self.env['res.company'].create({'name': 'A', 'parent_id': company0.id})
         company2 = self.env['res.company'].create({'name': 'B', 'parent_id': company1.id})
+
         # create one user per company
         user0 = self.env['res.users'].create({'name': 'Foo', 'login': 'foo',
                                               'company_id': company0.id, 'company_ids': []})
@@ -551,24 +572,44 @@ class TestFields(common.TransactionCase):
                                               'company_id': company1.id, 'company_ids': []})
         user2 = self.env['res.users'].create({'name': 'Baz', 'login': 'baz',
                                               'company_id': company2.id, 'company_ids': []})
-        # create a default value for the company-dependent field
-        field = self.env['ir.model.fields'].search([('model', '=', 'test_new_api.company'),
-                                                    ('name', '=', 'foo')])
-        self.env['ir.property'].create({'name': 'foo', 'fields_id': field.id,
+
+        # create values for many2one field
+        tag0 = self.env['test_new_api.multi.tag'].create({'name': 'Qux'})
+        tag1 = self.env['test_new_api.multi.tag'].create({'name': 'Quux'})
+        tag2 = self.env['test_new_api.multi.tag'].create({'name': 'Quuz'})
+
+        # create default values for the company-dependent fields
+        field_foo = self.env['ir.model.fields']._get('test_new_api.company', 'foo')
+        self.env['ir.property'].create({'name': 'foo', 'fields_id': field_foo.id,
                                         'value': 'default', 'type': 'char'})
+        field_tag_id = self.env['ir.model.fields']._get('test_new_api.company', 'tag_id')
+        self.env['ir.property'].create({'name': 'foo', 'fields_id': field_tag_id.id,
+                                        'value': tag0, 'type': 'many2one'})
 
         # create/modify a record, and check the value for each user
-        record = self.env['test_new_api.company'].create({'foo': 'main'})
+        record = self.env['test_new_api.company'].create({'foo': 'main', 'tag_id': tag1})
         record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, 'default')
         self.assertEqual(record.sudo(user2).foo, 'default')
+        self.assertEqual(record.sudo(user0).tag_id, tag1)
+        self.assertEqual(record.sudo(user1).tag_id, tag0)
+        self.assertEqual(record.sudo(user2).tag_id, tag0)
 
-        record.sudo(user1).foo = 'alpha'
+        record.sudo(user1).write({'foo': 'alpha', 'tag_id': tag2.id})
         record.invalidate_cache()
         self.assertEqual(record.sudo(user0).foo, 'main')
         self.assertEqual(record.sudo(user1).foo, 'alpha')
         self.assertEqual(record.sudo(user2).foo, 'default')
+        self.assertEqual(record.sudo(user0).tag_id, tag1)
+        self.assertEqual(record.sudo(user1).tag_id, tag2)
+        self.assertEqual(record.sudo(user2).tag_id, tag0)
+
+        # unlink value of a many2one (tag2), and check again
+        tag2.unlink()
+        self.assertEqual(record.sudo(user0).tag_id, tag1)
+        self.assertEqual(record.sudo(user1).tag_id, tag0.browse())
+        self.assertEqual(record.sudo(user2).tag_id, tag0)
 
         # create company record and attribute
         company_record = self.env['test_new_api.company'].create({'foo': 'ABC'})
@@ -651,16 +692,17 @@ class TestFields(common.TransactionCase):
         env = self.env(user=self.env.ref('base.user_demo'))
         self.assertEqual(env.user.login, "demo")
 
-        # create a new message as demo user
-        discussion = self.env.ref('test_new_api.discussion_0')
-        message = env['test_new_api.message'].new({'discussion': discussion})
-        self.assertEqual(message.discussion, discussion)
+        with self.env.do_in_onchange():
+            # create a new message as demo user
+            discussion = self.env.ref('test_new_api.discussion_0')
+            message = env['test_new_api.message'].new({'discussion': discussion})
+            self.assertEqual(message.discussion, discussion)
 
-        # read the related field discussion_name
-        self.assertEqual(message.discussion.env, env)
-        self.assertEqual(message.discussion_name, discussion.name)
-        with self.assertRaises(AccessError):
-            message.discussion.name
+            # read the related field discussion_name
+            self.assertEqual(message.discussion.env, env)
+            self.assertEqual(message.discussion_name, discussion.name)
+            with self.assertRaises(AccessError):
+                message.discussion.name
 
     @mute_logger('odoo.addons.base.ir.ir_model')
     def test_42_new_related(self):
@@ -673,14 +715,15 @@ class TestFields(common.TransactionCase):
         env = self.env(user=self.env.ref('base.user_demo'))
         self.assertEqual(env.user.login, "demo")
 
-        # create a new discussion and a new message as demo user
-        discussion = env['test_new_api.discussion'].new({'name': 'Stuff'})
-        message = env['test_new_api.message'].new({'discussion': discussion})
-        self.assertEqual(message.discussion, discussion)
+        with self.env.do_in_onchange():
+            # create a new discussion and a new message as demo user
+            discussion = env['test_new_api.discussion'].new({'name': 'Stuff'})
+            message = env['test_new_api.message'].new({'discussion': discussion})
+            self.assertEqual(message.discussion, discussion)
 
-        # read the related field discussion_name
-        self.assertNotEqual(message.sudo().env, message.env)
-        self.assertEqual(message.discussion_name, discussion.name)
+            # read the related field discussion_name
+            self.assertNotEqual(message.sudo().env, message.env)
+            self.assertEqual(message.discussion_name, discussion.name)
 
     def test_50_defaults(self):
         """ test default values. """

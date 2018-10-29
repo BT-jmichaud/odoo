@@ -273,7 +273,7 @@ return core.Class.extend({
             attrs.options = attrs.options ? pyeval.py_eval(attrs.options) : {};
         }
 
-        if (attrs.on_change && !field.onChange) {
+        if (attrs.on_change && attrs.on_change !== "0" && !field.onChange) {
             field.onChange = "1";
         }
 
@@ -365,12 +365,6 @@ return core.Class.extend({
                                 child.attrs.modifiers.column_invisible || false;
                         }
                     });
-
-                    // detect editables list has they behave differently with respect
-                    // to the sorting (changes are not sorted directly)
-                    if (mode === 'list' && view.arch.attrs.editable) {
-                         attrs.keepChangesUnsorted = true;
-                    }
                 }
             }
             if (attrs.Widget.prototype.fieldsToFetch) {

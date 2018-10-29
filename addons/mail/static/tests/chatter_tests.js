@@ -14,6 +14,8 @@ var BasicComposer = Composers.BasicComposer;
 var createAsyncView = testUtils.createAsyncView;
 var createView = testUtils.createView;
 
+var Activity = require('mail.Activity');
+
 QUnit.module('mail', {}, function () {
 
 QUnit.module('Chatter', {
@@ -68,6 +70,7 @@ QUnit.module('Chatter', {
                         type: 'selection',
                         selection: [['overdue', 'Overdue'], ['today', 'Today'], ['planned', 'Planned']],
                     },
+                    note : { string: "Note", type: "char" },
                 },
             },
             'mail.activity.type': {
@@ -158,6 +161,73 @@ QUnit.test('basic rendering', function (assert) {
     assert.strictEqual(count, 0, "should have done no read_followers rpc as there are no followers");
     assert.strictEqual(unwanted_read_count, 0, "followers should only be fetched with read_followers route");
     form.destroy();
+});
+
+QUnit.test('Activity Done keep feedback on blur', function (assert) {
+    assert.expect(3);
+    var done = assert.async();
+
+    this.data['mail.activity'].records = [
+        {activity_type_id: 1, id: 1, user_id: 2, state: 'today', note: 'But I\'m talkin\' about Shaft'},
+    ];
+    this.data.partner.records[0].activity_ids = [1];
+
+    var shownDef = $.Deferred();
+    var hiddenDef = $.Deferred();
+    testUtils.patch(Activity, {
+        _bindPopoverFocusout: function () {
+            this._super.apply(this, arguments);
+            shownDef.resolve();
+        },
+    });
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        res_id: 2,
+        arch:'<form string="Partners">' +
+                '<div class="oe_chatter">' +
+                    '<field name="activity_ids" widget="mail_activity"/>' +
+                '</div>' +
+            '</form>',
+    });
+
+    // sanity checks
+    var $activityEl = form.$('.o_mail_activity[name=activity_ids]');
+    assert.strictEqual($activityEl.find('.o_thread_message').length, 1,
+        'There should be one activity');
+    assert.strictEqual($activityEl.find('.o_thread_message .o_thread_message_note').text().trim(),
+        'But I\'m talkin\' about Shaft', 'The activity should have the right note');
+
+    var $popoverEl = $activityEl.find('.o_thread_message_tools .o_activity_done');
+    $popoverEl.on('hidden.bs.popover', hiddenDef.resolve.bind(hiddenDef));
+
+    // open popover
+    $popoverEl.click();
+
+    shownDef.then(function () {
+        // write a feedback and focusout
+        var $feedbackPopover = $popoverEl.data('bs.popover').tip();
+        $feedbackPopover.find('#activity_feedback').val('John Shaft').focusout();
+
+        hiddenDef.then(function () {
+            shownDef = $.Deferred();
+
+            // re-open popover
+            $popoverEl.click();
+
+            shownDef.then(function () {
+                var $feedbackPopover = $popoverEl.data('bs.popover').tip();
+                assert.strictEqual($feedbackPopover.find('#activity_feedback').val(), 'John Shaft',
+                    "feedback should have been kept");
+
+                form.destroy();
+                testUtils.unpatch(Activity);
+                done();
+            });
+        });
+    });
 });
 
 QUnit.test('chatter is not rendered in mode === create', function (assert) {
@@ -368,12 +438,12 @@ QUnit.test('kanban activity widget with an activity', function (assert) {
 
     // click on the activity button to re-open dropdown
     $record.find('.o_activity_btn').click();
-    assert.strictEqual(rpcCount, 2, 'no RPC should be done as the activities are now in cache');
+    assert.strictEqual(rpcCount, 3, 'should have reloaded the activities');
 
     // mark activity as done
     $record.find('.o_mark_as_done').click();
     $record = kanban.$('.o_kanban_record').first(); // the record widget has been reset
-    assert.strictEqual(rpcCount, 4, 'should have done an RPC to mark activity as done, and a read');
+    assert.strictEqual(rpcCount, 5, 'should have done an RPC to mark activity as done, and a read');
     assert.ok($record.find('.o_mail_activity .o_activity_color_default:not(.o_activity_color_today)').length,
         "activity widget should have been updated correctly");
     assert.strictEqual($record.find('.o_mail_activity.open').length, 1,
@@ -732,6 +802,125 @@ QUnit.test('chatter: Attachment viewer', function (assert) {
     form.destroy();
 });
 
+QUnit.test('form activity widget: read RPCs', function (assert) {
+    // Records of model 'mail.activity' may be updated in business flows (e.g.
+    // the date of a 'Meeting' activity is updated when the associated meeting
+    // is dragged&dropped in the Calendar view). Because of that, the activities
+    // must be reloaded when the form is reloaded (the widget can't keep an
+    // internal cache).
+    assert.expect(6);
+    this.data.partner.records[0].activity_ids = [1];
+    this.data.partner.records[0].activity_state = 'today';
+    this.data['mail.activity'].records = [{
+        id: 1,
+        display_name: "An activity",
+        date_deadline: moment().format("YYYY-MM-DD"), // now
+        state: "today",
+        user_id: 2,
+        activity_type_id: 2,
+    }];
+
+    var nbReads = 0;
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        arch: '<form string="Partners">' +
+                '<div class="oe_chatter">' +
+                    '<field name="activity_ids" widget="mail_activity"/>' +
+                '</div>' +
+            '</form>',
+        res_id: 2,
+        mockRPC: function (route, args) {
+            if (args.method === 'read' && args.model === 'mail.activity') {
+                nbReads++;
+            }
+            return this._super.apply(this, arguments);
+        },
+    });
+
+    assert.strictEqual(nbReads, 1, "should have read the activities");
+    assert.strictEqual(form.$('.o_mail_activity .o_thread_message').length, 1,
+        "should display an activity");
+    assert.strictEqual(form.$('.o_mail_activity .o_thread_message .o_activity_date').text(),
+        'Today', "the activity should be today");
+
+    form.$buttons.find('.o_form_button_edit').click();
+    form.$buttons.find('.o_form_button_save').click();
+
+    assert.strictEqual(nbReads, 1, "should not have re-read the activities");
+
+    // simulate a date change, and a reload of the form view
+    var tomorrow = moment().add(1, 'day').format("YYYY-MM-DD");
+    this.data['mail.activity'].records[0].date_deadline = tomorrow;
+    form.reload();
+
+    assert.strictEqual(nbReads, 2, "should have re-read the activities");
+    assert.strictEqual(form.$('.o_mail_activity .o_thread_message .o_activity_date').text(),
+        'Tomorrow', "the activity should be tomorrow");
+
+    form.destroy();
+});
+
+QUnit.test('form activity widget on a new record', function (assert) {
+    assert.expect(0);
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        arch: '<form string="Partners">' +
+                '<div class="oe_chatter">' +
+                    '<field name="activity_ids" widget="mail_activity"/>' +
+                '</div>' +
+            '</form>',
+        mockRPC: function (route, args) {
+            if (args.method === 'read' && args.model === 'mail.activity') {
+                throw new Error("should not do a read on mail.activity");
+            }
+            return this._super.apply(this, arguments);
+        },
+    });
+
+    form.destroy();
+});
+
+QUnit.test('form activity widget with another x2many field in view', function (assert) {
+    assert.expect(1);
+
+    this.data.partner.fields.m2m = {string: "M2M", type: 'many2many', relation: 'partner'};
+
+    this.data.partner.records[0].m2m = [2];
+    this.data.partner.records[0].activity_ids = [1];
+    this.data.partner.records[0].activity_state = 'today';
+    this.data['mail.activity'].records = [{
+        id: 1,
+        display_name: "An activity",
+        date_deadline: moment().format("YYYY-MM-DD"), // now
+        state: "today",
+        user_id: 2,
+        activity_type_id: 2,
+    }];
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        arch: '<form string="Partners">' +
+                '<field name="m2m" widget="many2many_tags"/>' +
+                '<div class="oe_chatter">' +
+                    '<field name="activity_ids" widget="mail_activity"/>' +
+                '</div>' +
+            '</form>',
+        res_id: 2,
+    });
+
+    assert.strictEqual(form.$('.o_mail_activity .o_thread_message').length, 1,
+        "should display an activity");
+
+    form.destroy();
+});
+
 QUnit.test('form activity widget: schedule next activity', function (assert) {
     assert.expect(5);
     this.data.partner.records[0].activity_ids = [1];
@@ -767,7 +956,7 @@ QUnit.test('form activity widget: schedule next activity', function (assert) {
                     "the feedback should be sent correctly");
                 return $.when();
             }
-            if (args.method === 'read' && checkReadArgs) {
+            if (args.method === 'read' && args.model === 'partner' && checkReadArgs) {
                 assert.deepEqual(args.args[1], ['activity_ids', 'message_ids', 'display_name'],
                     "should only read the mail fields");
             }
@@ -1250,8 +1439,9 @@ QUnit.module('FieldMany2ManyTagsEmail', {
 });
 
 QUnit.test('fieldmany2many tags email', function (assert) {
-    assert.expect(11);
+    assert.expect(13);
     var done = assert.async();
+    var nameGottenIds = [[12], [12, 14]];
 
     this.data.partner.records[0].timmy = [12, 14];
 
@@ -1271,7 +1461,11 @@ QUnit.test('fieldmany2many tags email', function (assert) {
             mode: 'edit',
         },
         mockRPC: function (route, args) {
-            if (args.method ==='read' && args.model === 'partner_type') {
+            if (route === "/web/dataset/call_kw/partner_type/name_get") {
+                assert.deepEqual(args.args[0], nameGottenIds.shift(),
+                    "partner with email should be name_get'ed");
+            }
+            else if (args.method ==='read' && args.model === 'partner_type') {
                 assert.step(args.args[0]);
                 assert.deepEqual(args.args[1] , ['display_name', 'email'], "should read the email");
             }

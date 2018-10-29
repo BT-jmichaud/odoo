@@ -54,8 +54,13 @@ ListRenderer.include({
      * @returns {Deferred}
      */
     start: function () {
-        if (this._isEditable()) {
-            this.$el.css({height: '100%'});
+        // deliberately use the 'editable' attribute instead of '_isEditable'
+        // function, because the groupBy must not be taken into account to
+        // enable the '_onWindowClicked' handler (otherwise, an editable grouped
+        // list which is reloaded without groupBy wouldn't have this handler
+        // bound, and edited rows couldn't be left by clicking outside the list)
+        if (this.editable) {
+            this.$el.css({height: '100%'}); // seems useless: to remove in master
             core.bus.on('click', this, this._onWindowClicked.bind(this));
         }
         return this._super();
@@ -493,7 +498,8 @@ ListRenderer.include({
     _renderRow: function (record, index) {
         var $row = this._super.apply(this, arguments);
         if (this.addTrashIcon) {
-            var $icon = $('<span>', {class: 'fa fa-trash-o', name: 'delete'});
+            var $icon = $('<button>', {class: 'fa fa-trash-o o_list_record_delete_btn', name: 'delete',
+                'aria-label': _t('Delete row ') + (index+1)});
             var $td = $('<td>', {class: 'o_list_record_delete'}).append($icon);
             $row.append($td);
         }
@@ -525,8 +531,13 @@ ListRenderer.include({
      * @returns {Deferred} this deferred is resolved immediately
      */
     _renderView: function () {
+        var self = this;
         this.currentRow = null;
-        return this._super.apply(this, arguments);
+        return this._super.apply(this, arguments).then(function () {
+            if (self._isEditable()) {
+                self.$('table').addClass('o_editable_list');
+            }
+        });
     },
     /**
      * Force the resequencing of the items in the list.
@@ -830,8 +841,16 @@ ListRenderer.include({
      */
     _onTrashIconClick: function (event) {
         event.stopPropagation();
-        var id = $(event.target).closest('tr').data('id');
-        this.trigger_up('list_record_delete', {id: id});
+        var $row = $(event.target).closest('tr')
+        var id = $row.data('id');
+        if ($row.hasClass('o_selected_row')) {
+            this.trigger_up('list_record_delete', {id: id});
+        } else {
+            var self = this;
+            this.unselectRow().then(function () {
+                self.trigger_up('list_record_delete', {id: id});
+            });
+        }
     },
     /**
      * When a click happens outside the list view, or outside a currently

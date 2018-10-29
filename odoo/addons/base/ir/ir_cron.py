@@ -71,6 +71,7 @@ class ir_cron(models.Model):
 
     @api.multi
     def method_direct_trigger(self):
+        self.check_access_rights('write')
         for cron in self:
             self.sudo(user=cron.user_id.id).ir_actions_server_id.run()
         return True
@@ -215,7 +216,7 @@ class ir_cron(models.Model):
                         _logger.debug("Job `%s` already executed by another process/thread. skipping it", job['cron_name'])
                         continue
                     # Got the lock on the job row, run its code
-                    _logger.debug('Starting job `%s`.', job['cron_name'])
+                    _logger.info('Starting job `%s`.', job['cron_name'])
                     job_cr = db.cursor()
                     try:
                         registry = odoo.registry(db_name)

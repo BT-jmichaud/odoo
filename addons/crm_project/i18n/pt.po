@@ -3,7 +3,7 @@
 # * crm_project
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2017
+# Martin Trigaux, 2017
 # Manuela Silva <manuela.silva@sky.com>, 2017
 msgid ""
 msgstr ""
@@ -25,6 +25,8 @@ msgid ""
 "<span class=\"o_stat_text\">Convert To</span>\n"
 "                            <span class=\"o_stat_text\">Task</span>"
 msgstr ""
+"<span class=\"o_stat_text\">Converter Para</span>\n"
+"                            <span class=\"o_stat_text\">Tarefa</span>"
 
 #. module: crm_project
 #: model:ir.ui.view,arch_db:crm_project.crm_lead_convert2task_view_form
@@ -61,7 +63,7 @@ msgstr "Nome a Mostrar"
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task_id
 msgid "ID"
-msgstr "ID"
+msgstr "Id."
 
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task___last_update
@@ -71,17 +73,17 @@ msgstr "Última Modificação em"
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task_write_uid
 msgid "Last Updated by"
-msgstr "Última Actualização por"
+msgstr "Última Atualização por"
 
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task_write_date
 msgid "Last Updated on"
-msgstr "Última Actualização em"
+msgstr "Última Atualização em"
 
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task_lead_id
 msgid "Lead"
-msgstr ""
+msgstr "Prospeto"
 
 #. module: crm_project
 #: model:ir.model.fields,field_description:crm_project.field_crm_lead_convert2task_project_id
